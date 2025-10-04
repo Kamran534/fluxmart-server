@@ -1,0 +1,30 @@
+{
+  "name": "fluxmart-server",
+  "version": "1.0.0",
+  "description": "An AI Powered ecommerce application server",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "author": "Muhammad Kamran",
+  "license": "ISC",
+  "devDependencies": {
+    "colors": "^1.4.0",
+    "nodemon": "^3.1.10"
+  },
+  "dependencies": {
+    "@apollo/server": "^5.0.0",
+    "@as-integrations/express5": "^1.1.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "graphql": "^16.11.0",
+    "morgan": "^1.10.1",
+    "nodemailer": "^7.0.6",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
+  }
+}
