@@ -6,15 +6,26 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "docker:build": "docker build -t fluxmart-server .",
+    "docker:run": "docker run -p 8000:8000 --name fluxmart-server fluxmart-server",
+    "docker:stop": "docker stop fluxmart-server",
+    "docker:rm": "docker rm fluxmart-server",
+    "docker:logs": "docker logs fluxmart-server",
+    "docker:compose:up": "docker-compose up -d",
+    "docker:compose:down": "docker-compose down",
+    "docker:compose:logs": "docker-compose logs -f",
+    "docker:compose:build": "docker-compose build",
+    "docker:clean": "docker stop fluxmart-server 2>/dev/null || true && docker rm fluxmart-server 2>/dev/null || true",
+    "docker:rebuild": "npm run docker:clean && npm run docker:build"
   },
   "author": "Muhammad Kamran",
   "license": "ISC",
   "devDependencies": {
-    "colors": "^1.4.0",
     "nodemon": "^3.1.10"
   },
   "dependencies": {
+    "colors": "^1.4.0",
     "@apollo/server": "^5.0.0",
     "@as-integrations/express5": "^1.1.2",
     "cors": "^2.8.5",
