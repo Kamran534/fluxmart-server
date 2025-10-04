@@ -17,7 +17,13 @@
     "docker:compose:logs": "docker-compose logs -f",
     "docker:compose:build": "docker-compose build",
     "docker:clean": "docker stop fluxmart-server 2>/dev/null || true && docker rm fluxmart-server 2>/dev/null || true",
-    "docker:rebuild": "npm run docker:clean && npm run docker:build"
+    "docker:rebuild": "npm run docker:clean && npm run docker:build",
+    "docker:tag": "docker tag fluxmart-server ghcr.io/kamran534/fluxmart-server:latest",
+    "docker:tag:version": "docker tag fluxmart-server ghcr.io/kamran534/fluxmart-server:$(node -p \"require('./package.json').version\")",
+    "docker:push": "docker push ghcr.io/kamran534/fluxmart-server:latest",
+    "docker:push:version": "docker push ghcr.io/kamran534/fluxmart-server:$(node -p \"require('./package.json').version\")",
+    "docker:publish": "npm run docker:tag && npm run docker:push",
+    "docker:publish:version": "npm run docker:tag:version && npm run docker:push:version"
   },
   "author": "Muhammad Kamran",
   "license": "ISC",
