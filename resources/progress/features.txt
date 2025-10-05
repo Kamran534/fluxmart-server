@@ -9,6 +9,12 @@ Implemented Features
   - Sample Books schema and resolvers mounted at /graphql
   - Production hardening: introspection disabled in prod; query depth limit via GRAPHQL_MAX_DEPTH
 
+- Authentication
+  - GraphQL mutations: register, login, refresh, logout, me
+  - JWT access and refresh tokens with Redis rotation/blacklist
+  - Email OTP verification using Redis TTL-backed codes
+  - Transactional emails: Welcome and OTP via EJS templates
+
 - API Documentation
   - Swagger UI at /api-docs (OpenAPI 3.0)
   - Tagged endpoints with request/response examples
