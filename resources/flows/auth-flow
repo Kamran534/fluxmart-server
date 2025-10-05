@@ -1,0 +1,204 @@
+# Auth Flow — Express + GraphQL E‑commerce Backend
+
+This document defines the **complete authentication and authorization flow** for the Express + GraphQL e‑commerce project.
+
+---
+
+## 1. Overview
+
+Authentication uses **JWT-based access & refresh tokens**, stored securely and managed through **Redis** for session rotation and blacklisting. The flow supports both **local (email/password)** and **social logins (Google, GitHub)** via OAuth2 (optional).
+
+---
+
+## 2. Auth Stack
+
+| Feature       | Technology                                   |
+| ------------- | -------------------------------------------- |
+| Hashing       | bcrypt                                       |
+| Tokens        | JWT (access + refresh)                       |
+| Token Storage | Redis (for refresh tokens / invalidation)    |
+| Middleware    | Express middleware + Apollo context          |
+| Social Auth   | Passport.js (GoogleStrategy, GitHubStrategy) |
+| Validation    | Zod / Joi                                    |
+| Security      | Helmet, rate-limit, GraphQL depth limiter    |
+
+---
+
+## 3. Flow Diagram (Local Auth)
+
+```
+User → Register → /graphql (register mutation)
+  ↓ (bcrypt hash + store user)
+  ← Return accessToken + refreshToken
+
+User → Login → /graphql (login mutation)
+  ↓ Verify password (bcrypt.compare)
+  ↓ Generate new tokens
+  ← Return accessToken + refreshToken
+
+User → Access protected query
+  ↓ Send Authorization: Bearer <accessToken>
+  ↓ Apollo context decodes JWT
+  ↓ If valid → grant access, else → 401
+
+User → Token Expired
+  ↓ Call refreshToken mutation
+  ↓ Verify refresh token in Redis
+  ↓ Issue new accessToken + refreshToken
+  ← Return tokens
+
+User → Logout
+  ↓ Invalidate refresh token in Redis
+  ← Success
+```
+
+---
+
+## 4. GraphQL Schema (Auth Part)
+
+```graphql
+type Mutation {
+  register(input: RegisterInput!): AuthPayload
+  login(input: LoginInput!): AuthPayload
+  refreshToken(token: String!): AuthPayload
+  logout: Boolean @auth
+}
+
+type AuthPayload {
+  accessToken: String!
+  refreshToken: String!
+  user: User!
+}
+
+input RegisterInput {
+  name: String!
+  email: String!
+  password: String!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+```
+
+---
+
+## 5. Auth Controller / Resolvers (Example)
+
+```js
+// src/graphql/resolvers/auth.js
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const { User } = require('../../models/User');
+const redisClient = require('../../config/redis');
+
+const ACCESS_TOKEN_EXP = '15m';
+const REFRESH_TOKEN_EXP = '7d';
+
+function signAccessToken(user) {
+  return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXP });
+}
+
+function signRefreshToken(user) {
+  const token = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXP });
+  redisClient.set(`refresh_${user._id}`, token, 'EX', 7 * 24 * 3600);
+  return token;
+}
+
+module.exports = {
+  Mutation: {
+    async register(_, { input }) {
+      const hashed = await bcrypt.hash(input.password, 10);
+      const user = await User.create({ ...input, password: hashed });
+      const accessToken = signAccessToken(user);
+      const refreshToken = signRefreshToken(user);
+      return { accessToken, refreshToken, user };
+    },
+
+    async login(_, { input }) {
+      const user = await User.findOne({ email: input.email });
+      if (!user) throw new Error('User not found');
+      const valid = await bcrypt.compare(input.password, user.password);
+      if (!valid) throw new Error('Invalid credentials');
+      const accessToken = signAccessToken(user);
+      const refreshToken = signRefreshToken(user);
+      return { accessToken, refreshToken, user };
+    },
+
+    async refreshToken(_, { token }) {
+      try {
+        const payload = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+        const saved = await redisClient.get(`refresh_${payload.id}`);
+        if (saved !== token) throw new Error('Invalid refresh token');
+        const user = await User.findById(payload.id);
+        const newAccess = signAccessToken(user);
+        const newRefresh = signRefreshToken(user);
+        return { accessToken: newAccess, refreshToken: newRefresh, user };
+      } catch (e) {
+        throw new Error('Token expired or invalid');
+      }
+    },
+
+    async logout(_, __, { user }) {
+      await redisClient.del(`refresh_${user.id}`);
+      return true;
+    }
+  }
+};
+```
+
+---
+
+## 6. Middleware (Token Verification)
+
+```js
+// src/middleware/auth.js
+const jwt = require('jsonwebtoken');
+
+module.exports = function auth(req, res, next) {
+  const header = req.headers['authorization'];
+  if (!header) return next();
+  const token = header.split(' ')[1];
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = payload;
+  } catch (e) {
+    req.user = null;
+  }
+  next();
+};
+```
+
+Then use in your Express app before Apollo middleware:
+
+```js
+app.use(auth);
+```
+
+---
+
+## 7. Security Enhancements
+* Token rotation: always issue new refresh on each refresh request.
+* Revoke tokens on password change or logout.
+* Limit refresh token reuse via Redis.
+* Add rate-limiting per IP/email for login attempts.
+
+---
+
+## 8. Optional: Social Login (Google)
+
+* Use `passport-google-oauth20`.
+* When callback returns user info, check if exists → create or update → issue JWT tokens.
+
+---
+
+## 9. Next Steps
+
+* Add middleware `@auth` GraphQL directive for role-based access.
+* Add email verification & password reset (with signed URL links).
+* Integrate 2FA (TOTP) for admin roles.
+
+---
+
+This completes the secure authentication layer for your Express + GraphQL e-commerce backend.

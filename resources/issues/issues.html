@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Project Issues</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; color: #111; }
+    h1 { margin: 0 0 16px; }
+    table { border-collapse: collapse; width: 100%; margin: 12px 0 24px; }
+    th, td { border: 1px solid #ddd; padding: 10px 12px; vertical-align: top; }
+    th { background: #f7f7f7; text-align: left; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; }
+    .prio-High { background:#fdecea; color:#b42318; }
+    .prio-Medium { background:#fff4e5; color:#b54708; }
+    .prio-Low { background:#eef4ff; color:#1d4ed8; }
+    .status-Open { background:#ecfdf3; color:#067647; }
+  </style>
+</head>
+<body>
+  <h1>Project Issues</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Issue</th>
+        <th>Impact</th>
+        <th>Priority</th>
+        <th>Action</th>
+        <th>Owner</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>OTP brute-force protection missing</td><td>Risk of code guessing</td><td><span class="tag prio-High">High</span></td><td>Add rate-limit per email/IP and max attempts; lockout window</td><td>Backend</td><td><span class="tag status-Open">Open</span></td></tr>
+      <tr><td>OTP resend cooldown not enforced</td><td>Email abuse, provider throttling</td><td><span class="tag prio-Medium">Medium</span></td><td>Enforce cooldown in Redis; return generic success</td><td>Backend</td><td><span class="tag status-Open">Open</span></td></tr>
+      <tr><td>Enforce email verification before login (policy)</td><td>Unverified access if required by product</td><td><span class="tag prio-Medium">Medium</span></td><td>If required, block login when <code>isEmailVerified=false</code></td><td>Product/Backend</td><td><span class="tag status-Open">Open</span></td></tr>
+      <tr><td>Refresh token reuse detection</td><td>Silent theft can go unnoticed</td><td><span class="tag prio-Medium">Medium</span></td><td>Detect reused/rotated RT and revoke all for user; alert</td><td>Backend</td><td><span class="tag status-Open">Open</span></td></tr>
+      <tr><td>Missing password reset GraphQL</td><td>Users cannot recover access</td><td><span class="tag prio-Medium">Medium</span></td><td>Add <code>requestPasswordReset</code>/<code>resetPassword</code> using existing templates</td><td>Backend</td><td><span class="tag status-Open">Open</span></td></tr>
+      <tr><td>JWT secrets ephemeral in dev</td><td>Tokens invalidated on restart</td><td><span class="tag prio-Low">Low</span></td><td>Document dev behavior; prefer <code>.env</code> secrets locally</td><td>DevEx</td><td><span class="tag status-Open">Open</span></td></tr>
+      <tr><td>SMTP deliverability (SPF/DKIM/DMARC)</td><td>OTP/welcome may land in spam</td><td><span class="tag prio-Medium">Medium</span></td><td>Verify domain and configure DNS records</td><td>DevOps</td><td><span class="tag status-Open">Open</span></td></tr>
+      <tr><td>Global CORS wide-open in prod</td><td>Security risk</td><td><span class="tag prio-High">High</span></td><td>Restrict by <code>CORS_ALLOWED_ORIGINS</code> in prod</td><td>Backend</td><td><span class="tag status-Open">Open</span></td></tr>
+      <tr><td>/graphql not rate-limited</td><td>Possible abuse</td><td><span class="tag prio-High">High</span></td><td>Apply rate-limit to POST /graphql; keep GET exempt</td><td>Backend</td><td><span class="tag status-Open">Open</span></td></tr>
+      <tr><td>Helmet CSP disabled</td><td>Reduced protection</td><td><span class="tag prio-Medium">Medium</span></td><td>Enable CSP in prod; relax only for dev</td><td>Backend</td><td><span class="tag status-Open">Open</span></td></tr>
+      <tr><td>Logging format in prod</td><td>Harder ops visibility</td><td><span class="tag prio-Low">Low</span></td><td>Use <code>combined</code>/JSON logs in prod</td><td>DevOps</td><td><span class="tag status-Open">Open</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2>Backlog (migrated)</h2>
+  <ul>
+    <li>Ports & URLs: DONE — Standardize PORT usage; docker and logs fixed</li>
+    <li>Containerization: DONE — npm ci, healthchecks cleanup, logs volume decision pending</li>
+    <li>Environment & Config: DONE — Added required env vars</li>
+    <li>Security: DONE — Email route security, CORS env-driven, rate-limit and helmet added, SMTP TLS config</li>
+    <li>API & Errors: DONE — Centralized errors and 404</li>
+    <li>GraphQL: DONE — Introspection disabled in prod; depth limit</li>
+    <li>Redis: DONE — Retry/backoff and ping readiness</li>
+    <li>Docs: DONE — Swagger servers from env</li>
+    <li>New: CORS allow-all, CSP off, GraphQL rate-limit exempt, Swagger wildcard CORS, prod logging format</li>
+  </ul>
+</body>
+</html>
+

@@ -1,0 +1,160 @@
+Auth GraphQL Testing Guide
+
+Endpoint
+- URL: http://localhost:${PORT}/graphql (default http://localhost:8080/graphql)
+
+Headers
+- Content-Type: application/json
+- Authorization: Bearer <accessToken> (only for me/logout; not needed for register/login/refresh)
+
+Register
+POST /graphql
+Body:
+{
+  "query": "mutation Register($input: RegisterInput!){ register(input: $input){ user { id email name } tokens { accessToken refreshToken } } }",
+  "variables": {
+    "input": { "email": "alice@example.com", "password": "Passw0rd!", "name": "Alice" }
+  }
+}
+
+Login
+POST /graphql
+Body:
+{
+  "query": "mutation Login($input: LoginInput!){ login(input: $input){ user { id email name } tokens { accessToken refreshToken } } }",
+  "variables": {
+    "input": { "email": "alice@example.com", "password": "Passw0rd!" }
+  }
+}
+
+Me (requires accessToken)
+POST /graphql
+Headers: Authorization: Bearer <accessToken>
+Body:
+{
+  "query": "query Me { me { id email name createdAt updatedAt } }"
+}
+
+Refresh Token
+POST /graphql
+Body:
+{
+  "query": "mutation Refresh($token: String!){ refreshToken(refreshToken: $token){ accessToken refreshToken } }",
+  "variables": { "token": "<refreshToken>" }
+}
+
+Logout (requires accessToken)
+POST /graphql
+Headers: Authorization: Bearer <accessToken>
+Body:
+{
+  "query": "mutation { logout }"
+}
+
+Example cURL (Login)
+curl -X POST http://localhost:8080/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "mutation($input: LoginInput!){ login(input: $input){ user { id email } tokens { accessToken refreshToken } } }",
+    "variables": { "input": { "email": "alice@example.com", "password": "Passw0rd!" } }
+  }'
+
+Example cURL (Me)
+curl -X POST http://localhost:8080/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <accessToken>" \
+  -d '{ "query": "{ me { id email name } }" }'
+
+Notes
+- Keep JWT_ACCESS_TTL_SEC short (e.g., 900s) and rotate refresh on every refresh call (already implemented).
+- On password change or manual security event, increment user.tokenVersion or call revoke-all to invalidate refresh tokens.
+
+
+GraphQL Operations (copy/paste)
+
+Register
+mutation Register($input: RegisterInput!) {
+  register(input: $input) {
+    user {
+      id
+      email
+      name
+    }
+    tokens {
+      accessToken
+      refreshToken
+    }
+  }
+}
+
+Variables (example)
+{
+  "input": {
+    "email": "alice@example.com",
+    "password": "Passw0rd!",
+    "name": "Alice"
+  }
+}
+
+Login
+mutation Login($input: LoginInput!) {
+  login(input: $input) {
+    user { id email name }
+    tokens { accessToken refreshToken }
+  }
+}
+
+Variables (example)
+{
+  "input": { "email": "alice@example.com", "password": "Passw0rd!" }
+}
+
+Me (requires Authorization header with accessToken)
+query Me {
+  me { id email name createdAt updatedAt }
+}
+
+Refresh Token
+mutation Refresh($token: String!) {
+  refreshToken(refreshToken: $token) {
+    accessToken
+    refreshToken
+  }
+}
+
+Variables (example)
+{
+  "token": "<refreshToken>"
+}
+
+Logout (requires Authorization header with accessToken)
+mutation {
+  logout
+}
+
+
+Email OTP
+Request Email OTP
+mutation RequestEmailOTP($email: String!) {
+  requestEmailOTP(email: $email)
+}
+
+Variables (example)
+{
+  "email": "alice@example.com"
+}
+
+Verify Email OTP
+mutation VerifyEmailOTP($email: String!, $otp: String!) {
+  verifyEmailOTP(email: $email, otp: $otp) {
+    user { id email name isEmailVerified }
+    tokens { accessToken refreshToken }
+  }
+}
+
+Variables (example)
+{
+  "email": "alice@example.com",
+  "otp": "123456"
+}
+

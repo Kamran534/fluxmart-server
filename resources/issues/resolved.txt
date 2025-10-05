@@ -1,0 +1,11 @@
+# Resolved Issues
+
+| Issue | Resolution | Date |
+| --- | --- | --- |
+| Duplicate Mongoose email index warning | Removed redundant `userSchema.index` (field already unique/indexed) | 2025-10-05 |
+| JWT secrets crash on startup | Lazy-init secrets; dev generates ephemeral, prod requires envs | 2025-10-05 |
+| OTP not sent on register | Register now generates/stores OTP and attempts email send | 2025-10-05 |
+| Missing OTP verification | Added `requestEmailOTP` and `verifyEmailOTP`; marks verified and returns tokens | 2025-10-05 |
+| Welcome email after verify | Send best-effort welcome email post verification | 2025-10-05 |
+
+

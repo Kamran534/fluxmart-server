@@ -1,0 +1,29 @@
+# Project Issues
+
+| Issue | Impact | Priority | Action | Owner | Status |
+| --- | --- | --- | --- | --- | --- |
+| OTP brute-force protection missing | Risk of code guessing | High | Add rate-limit per email/IP and max attempts; lockout window | Backend | Open |
+| OTP resend cooldown not enforced | Email abuse, provider throttling | Medium | Enforce cooldown in Redis; return generic success | Backend | Open |
+| Enforce email verification before login (policy) | Unverified access if required by product | Medium | If required, block login when `isEmailVerified=false` | Product/Backend | Open |
+| Refresh token reuse detection | Silent theft can go unnoticed | Medium | Detect reused/rotated RT and revoke all for user; alert | Backend | Open |
+| Missing password reset GraphQL | Users cannot recover access | Medium | Add `requestPasswordReset`/`resetPassword` using existing templates | Backend | Open |
+| JWT secrets ephemeral in dev | Tokens invalidated on restart | Low | Document dev behavior; prefer `.env` secrets locally | DevEx | Open |
+| SMTP deliverability (SPF/DKIM/DMARC) | OTP/welcome may land in spam | Medium | Verify domain and configure DNS records | DevOps | Open |
+| Global CORS wide-open in prod | Security risk | High | Restrict by `CORS_ALLOWED_ORIGINS` in prod | Backend | Open |
+| /graphql not rate-limited | Possible abuse | High | Apply rate-limit to POST /graphql; keep GET exempt | Backend | Open |
+| Helmet CSP disabled | Reduced protection | Medium | Enable CSP in prod; relax only for dev | Backend | Open |
+| Logging format in prod | Harder ops visibility | Low | Use `combined`/JSON logs in prod | DevOps | Open |
+
+## Backlog (migrated from resources/progress/issues.txt)
+
+- Ports & URLs: DONE — Standardize PORT usage; docker and logs fixed
+- Containerization: DONE — npm ci, healthchecks cleanup, logs volume decision pending
+- Environment & Config: DONE — Added required env vars
+- Security: DONE — Email route security, CORS env-driven, rate-limit and helmet added, SMTP TLS config
+- API & Errors: DONE — Centralized errors and 404
+- GraphQL: DONE — Introspection disabled in prod; depth limit
+- Redis: DONE — Retry/backoff and ping readiness
+- Docs: DONE — Swagger servers from env
+- New: CORS allow-all, CSP off, GraphQL rate-limit exempt, Swagger wildcard CORS, prod logging format
+
+

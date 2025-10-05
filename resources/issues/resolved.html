@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Resolved Issues</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; color: #111; }
+    h1 { margin: 0 0 16px; }
+    table { border-collapse: collapse; width: 100%; margin: 12px 0 24px; }
+    th, td { border: 1px solid #ddd; padding: 10px 12px; vertical-align: top; }
+    th { background: #f7f7f7; text-align: left; }
+  </style>
+</head>
+<body>
+  <h1>Resolved Issues</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Issue</th>
+        <th>Resolution</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Duplicate Mongoose email index warning</td><td>Removed redundant <code>userSchema.index</code> (field already unique/indexed)</td><td>2025-10-05</td></tr>
+      <tr><td>JWT secrets crash on startup</td><td>Lazy-init secrets; dev generates ephemeral, prod requires envs</td><td>2025-10-05</td></tr>
+      <tr><td>OTP not sent on register</td><td>Register now generates/stores OTP and attempts email send</td><td>2025-10-05</td></tr>
+      <tr><td>Missing OTP verification</td><td>Added <code>requestEmailOTP</code> and <code>verifyEmailOTP</code>; marks verified and returns tokens</td><td>2025-10-05</td></tr>
+      <tr><td>Welcome email after verify</td><td>Send best-effort welcome email post verification</td><td>2025-10-05</td></tr>
+    </tbody>
+  </table>
+</body>
+</html>
+

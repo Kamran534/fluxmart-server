@@ -3,17 +3,48 @@
 // your data.
 
 export const typeDefs = `#graphql
-  # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
-  # This "Book" type defines the queryable fields for every book in our data source.
-  type Book {
-    title: String
-    author: String
+  scalar Date
+
+  type User {
+    id: ID!
+    email: String!
+    name: String
+    isEmailVerified: Boolean
+    createdAt: Date
+    updatedAt: Date
   }
-  
-  # The "Query" type is special: it lists all of the available queries that
-  # clients can execute, along with the return type for each. In this
-  # case, the "books" query returns an array of zero or more Books (defined above).
+
+  type AuthTokens {
+    accessToken: String!
+    refreshToken: String!
+  }
+
+  type AuthPayload {
+    user: User!
+    tokens: AuthTokens!
+  }
+
+  input RegisterInput {
+    email: String!
+    password: String!
+    name: String
+  }
+
+  input LoginInput {
+    email: String!
+    password: String!
+  }
+
   type Query {
-    books: [Book]
+    me: User
+  }
+
+  type Mutation {
+    register(input: RegisterInput!): AuthPayload!
+    login(input: LoginInput!): AuthPayload!
+    refreshToken(refreshToken: String!): AuthTokens!
+    logout: Boolean!
+    requestEmailOTP(email: String!): Boolean!
+    verifyEmailOTP(email: String!, otp: String!): AuthPayload!
   }
 `;
