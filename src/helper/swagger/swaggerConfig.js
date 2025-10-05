@@ -1,6 +1,19 @@
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 
+const port = process.env.PORT || 8080;
+const localServerUrl = process.env.SWAGGER_SERVER_LOCAL || `http://localhost:${port}`;
+const prodServerUrl = process.env.SWAGGER_SERVER_PROD || null;
+
+const servers = [
+  {
+    url: localServerUrl,
+    description: 'Local Development Server'
+  },
+  // Only include production server if provided via env
+  ...(prodServerUrl ? [{ url: prodServerUrl, description: 'Production Server (Live)' }] : [])
+];
+
 const options = {
   definition: {
     openapi: '3.0.0',
@@ -18,16 +31,7 @@ const options = {
         url: 'https://opensource.org/licenses/ISC'
       }
     },
-    servers: [
-      {
-        url: 'http://localhost:8000',
-        description: 'Local Development Server'
-      },
-      {
-        url: 'https://api.fluxmart.com',
-        description: 'Production Server (Live)'
-      }
-    ],
+    servers,
     components: {
       securitySchemes: {
         bearerAuth: {

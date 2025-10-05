@@ -1,6 +1,6 @@
 import healthRouter from './health.js';
 import emailRouter from './email.js';
-import graphqlRouter from './graphql.js';
+// import graphqlRouter from './graphql.js';
 
 /**
  * Route registration function
@@ -13,8 +13,8 @@ export const registerRoutes = (app) => {
   // Email routes
   app.use('/', emailRouter);
   
-  // GraphQL routes (documentation only)
-  app.use('/', graphqlRouter);
+  // GraphQL routes (documentation only) - removed per request
+  // app.use('/', graphqlRouter);
 };
 
-export { healthRouter, emailRouter, graphqlRouter };
+export { healthRouter, emailRouter /*, graphqlRouter */ };

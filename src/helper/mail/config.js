@@ -5,16 +5,22 @@ dotenv.config();
 
 // Create reusable transporter object using SMTP transport
 const createTransporter = () => {
+  const smtpSecure = process.env.SMTP_SECURE === 'true';
+  const rejectUnauthorizedEnv = process.env.SMTP_REJECT_UNAUTHORIZED;
+  const rejectUnauthorized = typeof rejectUnauthorizedEnv === 'string'
+    ? rejectUnauthorizedEnv === 'true'
+    : (process.env.NODE_ENV === 'production');
+
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: process.env.SMTP_PORT || 587,
-    secure: process.env.SMTP_SECURE === 'true' ? true : false, // true for 465, false for other ports
+    secure: smtpSecure, // true for 465, false for other ports
     auth: {
       user: process.env.SMTP_USER, // your email
       pass: process.env.SMTP_PASS, // your email password or app password
     },
     tls: {
-      rejectUnauthorized: false
+      rejectUnauthorized: rejectUnauthorized
     }
   });
 };
@@ -24,10 +30,10 @@ const verifyConnection = async () => {
   try {
     const transporter = createTransporter();
     await transporter.verify();
-    console.log('SMTP Server is ready to take our messages'.green.bold);
+    console.log(' SMTP Server is ready to take our messages '.bgGreen.black.bold);
     return true;
   } catch (error) {
-    console.log('SMTP Server connection failed:'.red.bold, error.message);
+    console.log(' SMTP Server connection failed: '.bgRed.white.bold, error.message);
     return false;
   }
 };

@@ -9,7 +9,7 @@ RUN apk add --no-cache dumb-init
 COPY package*.json ./
 
 # Install all dependencies (including dev dependencies for potential build steps)
-RUN npm ci --frozen-lockfile
+RUN npm ci
 
 # Copy source code
 COPY . .
@@ -20,7 +20,7 @@ WORKDIR /app
 
 # Set production environment
 ENV NODE_ENV=production
-ENV PORT=8000
+ENV PORT=8080
 
 # Install dumb-init for proper signal handling
 RUN apk add --no-cache dumb-init
@@ -30,7 +30,7 @@ RUN addgroup -g 1001 -S app && adduser -S app -u 1001 -G app
 
 # Copy package files and install only production dependencies
 COPY package*.json ./
-RUN npm ci --only=production --frozen-lockfile && \
+RUN npm ci --omit=dev && \
     npm cache clean --force && \
     rm -rf /tmp/*
 
@@ -45,11 +45,11 @@ RUN mkdir -p logs && chown -R app:app logs
 USER app
 
 # Expose the port
-EXPOSE 8000
+EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:8000/', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+  CMD node -e "require('http').get('http://localhost:8080/', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
 # Start the application with dumb-init for proper signal handling
 ENTRYPOINT ["dumb-init", "--"]

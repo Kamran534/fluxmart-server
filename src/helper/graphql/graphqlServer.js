@@ -1,34 +1,37 @@
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@as-integrations/express5';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
+import depthLimit from 'graphql-depth-limit';
 import { typeDefs } from './schema.js';
 import { resolvers } from './resolvers.js';
 
 export const createGraphQLServer = async (httpServer) => {
-  // Create Apollo Server instance
+  const isProd = process.env.NODE_ENV === 'production';
+  const maxDepth = Number(process.env.GRAPHQL_MAX_DEPTH || 8);
+
+  const plugins = [ApolloServerPluginDrainHttpServer({ httpServer })];
+  if (!isProd) {
+    plugins.push(ApolloServerPluginLandingPageLocalDefault({ embed: true }));
+  }
+
   const server = new ApolloServer({
     typeDefs,
     resolvers,
-    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
-    introspection: true, // Enable introspection for development
+    plugins,
+    introspection: !isProd,
+    validationRules: [depthLimit(maxDepth)],
   });
 
-  // Start the server
   await server.start();
-
   return server;
 };
 
 export const applyGraphQLMiddleware = (app, server) => {
-  // Apply GraphQL middleware to Express app
+  // Handle both GET (landing page in non-prod) and POST (queries) on /graphql
   app.use('/graphql', expressMiddleware(server, {
-    context: async ({ req }) => {
-      // You can add authentication, user context, etc. here
-      return {
-        // Add any context you need for resolvers
-        user: req.user || null,
-        // Add database connections, etc.
-      };
-    },
+    context: async ({ req }) => ({
+      user: req.user || null,
+    }),
   }));
 };

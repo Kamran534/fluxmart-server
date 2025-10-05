@@ -1,0 +1,43 @@
+Implemented Features
+
+- Email Service
+  - Nodemailer with EJS templates: OTP, Welcome, Password Reset
+  - Initializes on server startup
+
+- GraphQL API
+  - Apollo Server on Express 5
+  - Sample Books schema and resolvers mounted at /graphql
+  - Production hardening: introspection disabled in prod; query depth limit via GRAPHQL_MAX_DEPTH
+
+- API Documentation
+  - Swagger UI at /api-docs (OpenAPI 3.0)
+  - Tagged endpoints with request/response examples
+  - Servers driven by env: SWAGGER_SERVER_LOCAL, SWAGGER_SERVER_PROD
+
+- Databases & Caching
+  - MongoDB via Mongoose (sane defaults, connection events logged)
+  - Redis via node-redis v4 (connected on startup, graceful shutdown)
+  - Redis readiness: exponential retry/backoff and ping check (REDIS_MAX_RETRIES, REDIS_RETRY_DELAY_MS)
+
+- Health & Status
+  - Root health endpoint
+  - /db-status: detailed info in non-prod; minimal state in production
+
+- Security
+  - CORS restricted by env (CORS_ALLOWED_ORIGINS)
+  - Helmet security headers
+  - Rate limiting with express-rate-limit (RATE_LIMIT_* envs)
+  - Email test route Swagger marked public (security: []) to match behavior
+
+- Logging
+  - Morgan HTTP request logging (dev format)
+  - Service startup and lifecycle logs
+
+- Config & Ops
+  - Standardized to port 8080 across scripts/compose
+  - Dockerfile uses npm ci (build/runtime) and non-root user
+  - docker-compose uses env interpolation for app configuration
+
+Notes
+- Set required envs: MONGODB_URI, REDIS_URL, SMTP_*, CORS_ALLOWED_ORIGINS.
+- In production: disable GraphQL introspection (default) and use strict CORS.

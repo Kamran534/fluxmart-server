@@ -5,16 +5,29 @@ services:
       dockerfile: Dockerfile
     container_name: fluxmart-server
     ports:
-      - "8000:8000"
+      - "8080:8080"
     environment:
       - NODE_ENV=production
-      - PORT=8000
+      - PORT=8080
+      - MONGODB_URI=${MONGODB_URI}
+      - MONGODB_DB_NAME=${MONGODB_DB_NAME}
+      - REDIS_URL=${REDIS_URL}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_SECURE=${SMTP_SECURE}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - FROM_EMAIL=${FROM_EMAIL}
+      - REPLY_TO_EMAIL=${REPLY_TO_EMAIL}
+      - COMPANY_NAME=${COMPANY_NAME}
+      - COMPANY_WEBSITE=${COMPANY_WEBSITE}
+      - SUPPORT_EMAIL=${SUPPORT_EMAIL}
     volumes:
       # Mount logs directory for persistent logging
       - ./logs:/app/logs
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8000/', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8080/', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
       interval: 30s
       timeout: 10s
       retries: 3

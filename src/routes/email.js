@@ -10,8 +10,7 @@ const router = express.Router();
  *     tags: [Email]
  *     summary: Send test email
  *     description: Send various types of emails (OTP, welcome, password reset) for testing purposes
- *     security:
- *       - bearerAuth: []
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:

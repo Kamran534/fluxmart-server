@@ -1,0 +1,54 @@
+Redis - Commands and Responses (FluxMart)
+
+1) Start Redis (detached)
+Command:
+  docker run -d --name redis-fluxmart-database -p 6379:6379 redis:latest
+
+Example response:
+  dd7a4a752c25c1b9f1a3e7b0b6adf4a8d6c4f1a2b3c4d5e6f7a8b9c0d1e2f3a4
+  # A 64-char container ID (yours will differ)
+
+2) List running containers
+Command:
+  docker ps
+
+Example response (truncated):
+  CONTAINER ID   IMAGE          COMMAND                  CREATED          STATUS          PORTS                                         NAMES
+  dd7a4a752c25   redis:latest   "docker-entrypoint.s…"   7 minutes ago    Up 4 seconds    0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp   redis-fluxmart-database
+
+3) Open Redis CLI inside the container
+Command:
+  docker exec -it redis-fluxmart-database redis-cli
+
+Example response:
+  127.0.0.1:6379>
+
+4) Redis CLI: PING (connectivity)
+At the redis-cli prompt run:
+  127.0.0.1:6379> PING
+
+Example response:
+  PONG
+
+5) Redis CLI: INFO (server diagnostics)
+At the redis-cli prompt run:
+  127.0.0.1:6379> INFO
+
+Example response (truncated):
+  # Server
+  redis_version:7.2.x
+  os:Linux 5.x.x x86_64
+  process_id:1
+  uptime_in_seconds:123
+  uptime_in_days:0
+  # Clients
+  connected_clients:1
+  # Memory
+  used_memory_human:1.23M
+  # Stats
+  total_connections_received:1
+  total_commands_processed:2
+
+Notes
+- Outputs will vary by environment and Redis version.
+- Ensure Docker Desktop is running on Windows when executing these commands.

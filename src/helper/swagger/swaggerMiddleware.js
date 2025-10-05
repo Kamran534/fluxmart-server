@@ -38,14 +38,15 @@ export const setupSwagger = (app) => {
     res.redirect('/api-docs');
   });
 
-  console.log('Swagger documentation available at:'.blue.bold);
-  console.log('  - UI: http://localhost:8000/api-docs'.blue.underline.bold);
-  console.log('  - JSON: http://localhost:8000/api-docs.json'.blue.underline.bold);
-  console.log('  - Docs: http://localhost:8000/docs'.blue.underline.bold);
+  // const port = process.env.PORT || 8080;
+  // console.log('Swagger documentation available at:'.blue.bold);
+  // console.log(`  - UI: http://localhost:${port}/api-docs`.blue.underline.bold);
+  // console.log(`  - JSON: http://localhost:${port}/api-docs.json`.blue.underline.bold);
+  // console.log(`  - Docs: http://localhost:${port}/docs`.blue.underline.bold);
   
-  console.log('\nAvailable server options:'.yellow.bold);
-  console.log('  - Local Development: http://localhost:8000'.cyan);
-  console.log('  - Production (Live): https://api.fluxmart.com'.green);
+  // console.log('\nAvailable server options:'.yellow.bold);
+  // console.log(`  - Local Development: http://localhost:${port}`.cyan);
+  // console.log('  - Production (Live): https://api.fluxmart.com'.green);
 };
 
 export default setupSwagger;

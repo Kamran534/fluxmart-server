@@ -13,9 +13,9 @@ class EmailService {
       this.isConnected = await verifyConnection();
       if (this.isConnected) {
         this.transporter = createTransporter();
-        console.log('Email service initialized successfully'.green.bold);
+        console.log(' Email service initialized successfully '.bgGreen.black.bold);
       } else {
-        console.log('Email service initialization failed'.red.bold);
+        console.log(' Email service initialization failed '.bgRed.white.bold);
       }
       return this.isConnected;
     } catch (error) {
@@ -53,7 +53,7 @@ class EmailService {
       console.log(`OTP email sent to ${to}`.green.bold);
       return { success: true, messageId: result.messageId };
     } catch (error) {
-      console.log(`Failed to send OTP email to ${to}:`.red.bold, error.message);
+      console.log(` Failed to send OTP email to ${to}: `.bgRed.white.bold, error.message);
       throw error;
     }
   }
@@ -86,7 +86,7 @@ class EmailService {
       console.log(`Welcome email sent to ${to}`.green.bold);
       return { success: true, messageId: result.messageId };
     } catch (error) {
-      console.log(`Failed to send welcome email to ${to}:`.red.bold, error.message);
+      console.log(` Failed to send welcome email to ${to}: `.bgRed.white.bold, error.message);
       throw error;
     }
   }
@@ -120,7 +120,7 @@ class EmailService {
       console.log(`Password reset email sent to ${to}`.green.bold);
       return { success: true, messageId: result.messageId };
     } catch (error) {
-      console.log(`Failed to send password reset email to ${to}:`.red.bold, error.message);
+      console.log(` Failed to send password reset email to ${to}: `.bgRed.white.bold, error.message);
       throw error;
     }
   }
@@ -149,7 +149,7 @@ class EmailService {
       console.log(`Custom email sent to ${to}`.green.bold);
       return { success: true, messageId: result.messageId };
     } catch (error) {
-      console.log(`Failed to send custom email to ${to}:`.red.bold, error.message);
+      console.log(` Failed to send custom email to ${to}: `.bgRed.white.bold, error.message);
       throw error;
     }
   }
@@ -173,7 +173,7 @@ class EmailService {
         console.log(`Raw email sent to ${to}`.green.bold);
       return { success: true, messageId: result.messageId };
     } catch (error) {
-      console.log(`Failed to send raw email to ${to}:`.red.bold, error.message);
+      console.log(` Failed to send raw email to ${to}: `.bgRed.white.bold, error.message);
       throw error;
     }
   }
@@ -218,10 +218,10 @@ class EmailService {
       };
 
       const result = await this.sendCustomEmail(testEmail);
-      console.log('Email service test successful'.green.bold);
+      console.log(' Email service test successful '.bgGreen.black.bold);
       return { success: true, messageId: result.messageId };
     } catch (error) {
-      console.log('Email service test failed:'.red.bold, error.message);
+      console.log(' Email service test failed: '.bgRed.white.bold, error.message);
       return { success: false, error: error.message };
     }
   }
