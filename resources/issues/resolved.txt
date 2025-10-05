@@ -1,11 +1,16 @@
 # Resolved Issues
 
-| Issue | Resolution | Date |
-| --- | --- | --- |
-| Duplicate Mongoose email index warning | Removed redundant `userSchema.index` (field already unique/indexed) | 2025-10-05 |
-| JWT secrets crash on startup | Lazy-init secrets; dev generates ephemeral, prod requires envs | 2025-10-05 |
-| OTP not sent on register | Register now generates/stores OTP and attempts email send | 2025-10-05 |
-| Missing OTP verification | Added `requestEmailOTP` and `verifyEmailOTP`; marks verified and returns tokens | 2025-10-05 |
-| Welcome email after verify | Send best-effort welcome email post verification | 2025-10-05 |
+| Issue | Resolution | Date | Time |
+| --- | --- | --- | --- |
+| Duplicate Mongoose email index warning | Removed redundant `userSchema.index` (field already unique/indexed) | 2025-10-06 | 00:48 |
+| JWT secrets crash on startup | Lazy-init secrets; dev generates ephemeral, prod requires envs | 2025-10-06 | 00:48 |
+| OTP not sent on register | Register now generates/stores OTP and attempts email send | 2025-10-06 | 00:48 |
+| Missing OTP verification | Added `requestEmailOTP` and `verifyEmailOTP`; marks verified and returns tokens | 2025-10-06 | 00:48 |
+| Welcome email after verify | Send best-effort welcome email post verification | 2025-10-06 | 00:48 |
+| GraphQL CSRF header requirement | Added guide examples and cURL with headers | 2025-10-06 | 00:48 |
+| Me null without Bearer | Expanded token parsing to raw/cookies; updated guide | 2025-10-06 | 00:48 |
+| Persist refresh sessions | Added hashed sessions to User; update on login/refresh/logout | 2025-10-06 | 00:48 |
+| Split resolvers | Moved to graphql/user/* and composed exports | 2025-10-06 | 00:48 |
+| Enforce email verification before login | Block login when not verified; return 403 | 2025-10-06 | 00:48 |
 
 

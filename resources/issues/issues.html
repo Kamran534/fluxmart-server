@@ -33,7 +33,6 @@
     <tbody>
       <tr><td>OTP brute-force protection missing</td><td>Risk of code guessing</td><td><span class="tag prio-High">High</span></td><td>Add rate-limit per email/IP and max attempts; lockout window</td><td>Backend</td><td><span class="tag status-Open">Open</span></td></tr>
       <tr><td>OTP resend cooldown not enforced</td><td>Email abuse, provider throttling</td><td><span class="tag prio-Medium">Medium</span></td><td>Enforce cooldown in Redis; return generic success</td><td>Backend</td><td><span class="tag status-Open">Open</span></td></tr>
-      <tr><td>Enforce email verification before login (policy)</td><td>Unverified access if required by product</td><td><span class="tag prio-Medium">Medium</span></td><td>If required, block login when <code>isEmailVerified=false</code></td><td>Product/Backend</td><td><span class="tag status-Open">Open</span></td></tr>
       <tr><td>Refresh token reuse detection</td><td>Silent theft can go unnoticed</td><td><span class="tag prio-Medium">Medium</span></td><td>Detect reused/rotated RT and revoke all for user; alert</td><td>Backend</td><td><span class="tag status-Open">Open</span></td></tr>
       <tr><td>Missing password reset GraphQL</td><td>Users cannot recover access</td><td><span class="tag prio-Medium">Medium</span></td><td>Add <code>requestPasswordReset</code>/<code>resetPassword</code> using existing templates</td><td>Backend</td><td><span class="tag status-Open">Open</span></td></tr>
       <tr><td>JWT secrets ephemeral in dev</td><td>Tokens invalidated on restart</td><td><span class="tag prio-Low">Low</span></td><td>Document dev behavior; prefer <code>.env</code> secrets locally</td><td>DevEx</td><td><span class="tag status-Open">Open</span></td></tr>
@@ -57,6 +56,26 @@
     <li>Docs: DONE — Swagger servers from env</li>
     <li>New: CORS allow-all, CSP off, GraphQL rate-limit exempt, Swagger wildcard CORS, prod logging format</li>
   </ul>
+
+  <h2>Newly Identified</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Issue</th>
+        <th>Impact</th>
+        <th>Priority</th>
+        <th>Action</th>
+        <th>Owner</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>GraphQL CSRF header requirement not documented in guide</td><td>Requests blocked</td><td><span class="tag prio-Medium">Medium</span></td><td>Add header examples (Content-Type + x-apollo-operation-name)</td><td>Docs</td><td><span class="tag status-Open">Resolved</span></td></tr>
+      <tr><td>Me returned null without Bearer</td><td>DX confusion</td><td><span class="tag prio-Low">Low</span></td><td>Accept tokens from Authorization/raw/cookies</td><td>Backend</td><td><span class="tag status-Open">Resolved</span></td></tr>
+      <tr><td>Refresh sessions persisted to DB</td><td>Session mgmt needed</td><td><span class="tag prio-High">High</span></td><td>Implement hashed RT sessions in <code>User.sessions</code></td><td>Backend</td><td><span class="tag status-Open">Resolved</span></td></tr>
+      <tr><td>Resolver file grows large</td><td>Maintainability</td><td><span class="tag prio-Low">Low</span></td><td>Split into <code>user/</code> auth & user resolvers</td><td>Backend</td><td><span class="tag status-Open">Resolved</span></td></tr>
+    </tbody>
+  </table>
 </body>
 </html>
 

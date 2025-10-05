@@ -8,6 +8,16 @@ const userSchema = new mongoose.Schema(
     isEmailVerified: { type: Boolean, default: false },
     // When incremented, previously issued refresh tokens become invalid
     tokenVersion: { type: Number, default: 0 },
+    sessions: [
+      {
+        jti: { type: String, required: true },
+        tokenHash: { type: String, required: true },
+        userAgent: { type: String },
+        ip: { type: String },
+        createdAt: { type: Date, default: Date.now },
+        expiresAt: { type: Date, required: true },
+      }
+    ],
   },
   { timestamps: true }
 );

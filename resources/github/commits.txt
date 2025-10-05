@@ -1,3 +1,7 @@
 Date/Time: 2025-10-05 00:00
 Commit: fc046f9
 Summary: GraphQL on Express with Apollo UI (dev), strict CORS per-route, Swagger env servers, Redis retries, rate limiting & helmet, 404/error handlers, env helper, and docs updates.
+
+Date/Time: 2025-10-05 00:00
+Commit: ecd1fcd
+Summary: Auth system: GraphQL mutations (register/login/refresh/logout/me), JWT access+refresh with Redis rotation, OTP email verification and welcome email, guide updates, issues tracking (txt+html), and auth flow HTML.

@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Auth Flow — Express + GraphQL</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; color: #111; line-height: 1.5; }
+    h1,h2,h3 { margin: 16px 0 8px; }
+    hr { border: 0; border-top: 1px solid #eee; margin: 16px 0; }
+    table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+    th, td { border: 1px solid #ddd; padding: 8px 10px; text-align: left; }
+    th { background: #f7f7f7; }
+    pre { background: #0b1020; color: #e6e6e6; padding: 12px; overflow: auto; border-radius: 6px; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  </style>
+</head>
+<body>
+  <h1>Auth Flow — Express + GraphQL E‑commerce Backend</h1>
+  <p>This document defines the <strong>complete authentication and authorization flow</strong> for the Express + GraphQL e‑commerce project.</p>
+  <hr />
+
+  <h2>1. Overview</h2>
+  <p>Authentication uses <strong>JWT-based access &amp; refresh tokens</strong>, stored securely and managed through <strong>Redis</strong> for session rotation and blacklisting. The flow supports both <strong>local (email/password)</strong> and <strong>social logins (Google, GitHub)</strong> via OAuth2 (optional).</p>
+  <hr />
+
+  <h2>2. Auth Stack</h2>
+  <table>
+    <thead><tr><th>Feature</th><th>Technology</th></tr></thead>
+    <tbody>
+      <tr><td>Hashing</td><td>bcrypt</td></tr>
+      <tr><td>Tokens</td><td>JWT (access + refresh)</td></tr>
+      <tr><td>Token Storage</td><td>Redis (for refresh tokens / invalidation)</td></tr>
+      <tr><td>Middleware</td><td>Express middleware + Apollo context</td></tr>
+      <tr><td>Social Auth</td><td>Passport.js (GoogleStrategy, GitHubStrategy)</td></tr>
+      <tr><td>Validation</td><td>Zod / Joi</td></tr>
+      <tr><td>Security</td><td>Helmet, rate-limit, GraphQL depth limiter</td></tr>
+    </tbody>
+  </table>
+  <hr />
+
+  <h2>3. Flow Diagram (Local Auth)</h2>
+  <pre><code>User → Register → /graphql (register mutation)
+  ↓ (bcrypt hash + store user)
+  ← Return accessToken + refreshToken
+
+User → Login → /graphql (login mutation)
+  ↓ Verify password (bcrypt.compare)
+  ↓ Generate new tokens
+  ← Return accessToken + refreshToken
+
+User → Access protected query
+  ↓ Send Authorization: Bearer &lt;accessToken&gt;
+  ↓ Apollo context decodes JWT
+  ↓ If valid → grant access, else → 401
+
+User → Token Expired
+  ↓ Call refreshToken mutation
+  ↓ Verify refresh token in Redis
+  ↓ Issue new accessToken + refreshToken
+  ← Return tokens
+
+User → Logout
+  ↓ Invalidate refresh token in Redis
+  ← Success</code></pre>
+  <hr />
+
+  <h2>4. GraphQL Schema (Auth Part)</h2>
+  <pre><code class="language-graphql">type Mutation {
+  register(input: RegisterInput!): AuthPayload
+  login(input: LoginInput!): AuthPayload
+  refreshToken(token: String!): AuthPayload
+  logout: Boolean @auth
+}
+
+type AuthPayload {
+  accessToken: String!
+  refreshToken: String!
+  user: User!
+}
+
+input RegisterInput {
+  name: String!
+  email: String!
+  password: String!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}</code></pre>
+  <hr />
+
+  <h2>5. Auth Controller / Resolvers (Example)</h2>
+  <pre><code class="language-js">// src/graphql/resolvers/auth.js
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const { User } = require('../../models/User');
+const redisClient = require('../../config/redis');
+
+const ACCESS_TOKEN_EXP = '15m';
+const REFRESH_TOKEN_EXP = '7d';
+
+function signAccessToken(user) {
+  return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXP });
+}
+
+function signRefreshToken(user) {
+  const token = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXP });
+  redisClient.set(`refresh_${user._id}`, token, 'EX', 7 * 24 * 3600);
+  return token;
+}
+
+module.exports = {
+  Mutation: {
+    async register(_, { input }) {
+      const hashed = await bcrypt.hash(input.password, 10);
+      const user = await User.create({ ...input, password: hashed });
+      const accessToken = signAccessToken(user);
+      const refreshToken = signRefreshToken(user);
+      return { accessToken, refreshToken, user };
+    },
+
+    async login(_, { input }) {
+      const user = await User.findOne({ email: input.email });
+      if (!user) throw new Error('User not found');
+      const valid = await bcrypt.compare(input.password, user.password);
+      if (!valid) throw new Error('Invalid credentials');
+      const accessToken = signAccessToken(user);
+      const refreshToken = signRefreshToken(user);
+      return { accessToken, refreshToken, user };
+    },
+
+    async refreshToken(_, { token }) {
+      try {
+        const payload = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+        const saved = await redisClient.get(`refresh_${payload.id}`);
+        if (saved !== token) throw new Error('Invalid refresh token');
+        const user = await User.findById(payload.id);
+        const newAccess = signAccessToken(user);
+        const newRefresh = signRefreshToken(user);
+        return { accessToken: newAccess, refreshToken: newRefresh, user };
+      } catch (e) {
+        throw new Error('Token expired or invalid');
+      }
+    },
+
+    async logout(_, __, { user }) {
+      await redisClient.del(`refresh_${user.id}`);
+      return true;
+    }
+  }
+};</code></pre>
+  <hr />
+
+  <h2>6. Middleware (Token Verification)</h2>
+  <pre><code class="language-js">// src/middleware/auth.js
+const jwt = require('jsonwebtoken');
+
+module.exports = function auth(req, res, next) {
+  const header = req.headers['authorization'];
+  if (!header) return next();
+  const token = header.split(' ')[1];
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = payload;
+  } catch (e) {
+    req.user = null;
+  }
+  next();
+};
+
+// Then use in Express before Apollo:
+// app.use(auth);
+  </code></pre>
+  <hr />
+
+  <h2>7. Security Enhancements</h2>
+  <ul>
+    <li>Token rotation: always issue new refresh on each refresh request.</li>
+    <li>Revoke tokens on password change or logout.</li>
+    <li>Limit refresh token reuse via Redis.</li>
+    <li>Add rate-limiting per IP/email for login attempts.</li>
+  </ul>
+  <hr />
+
+  <h2>8. Optional: Social Login (Google)</h2>
+  <ul>
+    <li>Use <code>passport-google-oauth20</code>.</li>
+    <li>On callback, upsert user and issue JWT tokens.</li>
+  </ul>
+  <hr />
+
+  <h2>9. Next Steps</h2>
+  <ul>
+    <li>Add middleware <code>@auth</code> GraphQL directive for role-based access.</li>
+    <li>Add email verification &amp; password reset (with signed URL links).</li>
+    <li>Integrate 2FA (TOTP) for admin roles.</li>
+  </ul>
+
+  <p>This completes the secure authentication layer for your Express + GraphQL e‑commerce backend.</p>
+</body>
+</html>
+

@@ -26,3 +26,5 @@ Dependencies		✅ Installed		100%
 OTP email		    ✅ Added			100%
 Verify OTP		    ✅ Added			100%
 Welcome mail		✅ On verify		100%
+Refresh sessions DB	✅ Added			100%
+Resolvers split		✅ Done			100%

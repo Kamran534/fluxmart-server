@@ -20,14 +20,20 @@
         <th>Issue</th>
         <th>Resolution</th>
         <th>Date</th>
+        <th>Time</th>
       </tr>
     </thead>
     <tbody>
-      <tr><td>Duplicate Mongoose email index warning</td><td>Removed redundant <code>userSchema.index</code> (field already unique/indexed)</td><td>2025-10-05</td></tr>
-      <tr><td>JWT secrets crash on startup</td><td>Lazy-init secrets; dev generates ephemeral, prod requires envs</td><td>2025-10-05</td></tr>
-      <tr><td>OTP not sent on register</td><td>Register now generates/stores OTP and attempts email send</td><td>2025-10-05</td></tr>
-      <tr><td>Missing OTP verification</td><td>Added <code>requestEmailOTP</code> and <code>verifyEmailOTP</code>; marks verified and returns tokens</td><td>2025-10-05</td></tr>
-      <tr><td>Welcome email after verify</td><td>Send best-effort welcome email post verification</td><td>2025-10-05</td></tr>
+      <tr><td>Duplicate Mongoose email index warning</td><td>Removed redundant <code>userSchema.index</code> (field already unique/indexed)</td><td>2025-10-06</td><td>00:48</td></tr>
+      <tr><td>JWT secrets crash on startup</td><td>Lazy-init secrets; dev generates ephemeral, prod requires envs</td><td>2025-10-06</td><td>00:48</td></tr>
+      <tr><td>OTP not sent on register</td><td>Register now generates/stores OTP and attempts email send</td><td>2025-10-06</td><td>00:48</td></tr>
+      <tr><td>Missing OTP verification</td><td>Added <code>requestEmailOTP</code> and <code>verifyEmailOTP</code>; marks verified and returns tokens</td><td>2025-10-06</td><td>00:48</td></tr>
+      <tr><td>Welcome email after verify</td><td>Send best-effort welcome email post verification</td><td>2025-10-06</td><td>00:48</td></tr>
+      <tr><td>GraphQL CSRF header requirement</td><td>Added guide examples and cURL with headers</td><td>2025-10-06</td><td>00:48</td></tr>
+      <tr><td>Me null without Bearer</td><td>Expanded token parsing to raw/cookies; updated guide</td><td>2025-10-06</td><td>00:48</td></tr>
+      <tr><td>Persist refresh sessions</td><td>Hashed sessions on login/refresh; cleared on logout</td><td>2025-10-06</td><td>00:48</td></tr>
+      <tr><td>Split resolvers</td><td>Created graphql/user/* and composed exports</td><td>2025-10-06</td><td>00:48</td></tr>
+      <tr><td>Enforce email verification before login</td><td>Login blocked when not verified (403)</td><td>2025-10-06</td><td>00:48</td></tr>
     </tbody>
   </table>
 </body>

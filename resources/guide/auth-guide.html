@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Auth GraphQL Testing Guide</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; color: #111; line-height: 1.55; }
+    h1,h2,h3 { margin: 16px 0 8px; }
+    p { margin: 8px 0; }
+    ul { margin: 6px 0 12px 20px; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    pre { background: #0b1020; color: #e6e6e6; padding: 12px; overflow: auto; border-radius: 6px; }
+    .hint { color: #444; }
+    .section { margin-bottom: 20px; }
+    .hdr { background:#f7f7f7; padding: 8px 10px; border: 1px solid #e5e5e5; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <h1>Auth GraphQL Testing Guide</h1>
+
+  <div class="section">
+    <div class="hdr"><strong>Endpoint</strong></div>
+    <p>URL: <code>http://localhost:${PORT}/graphql</code> (default <code>http://localhost:8080/graphql</code>)</p>
+  </div>
+
+  <div class="section">
+    <div class="hdr"><strong>Headers</strong></div>
+    <ul>
+      <li><code>Content-Type: application/json</code></li>
+      <li><code>Authorization: Bearer &lt;accessToken&gt;</code> (for me/logout; not needed for register/login/refresh)</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="hdr"><strong>How to add the token to headers</strong></div>
+    <h3>cURL</h3>
+    <pre>curl -X POST http://localhost:8080/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer &lt;accessToken&gt;" \
+  -d '{ "query": "{ me { id email } }" }'</pre>
+
+    <h3>Postman</h3>
+    <ul>
+      <li>Go to the <strong>Headers</strong> tab and add: <code>Authorization</code> = <code>Bearer &lt;accessToken&gt;</code></li>
+      <li>Or in <strong>Authorization</strong> tab, choose <em>Bearer Token</em> and paste the access token.</li>
+    </ul>
+
+    <h3>Apollo Sandbox / GraphQL Playground</h3>
+    <ul>
+      <li>Open the <strong>Headers</strong> panel (usually on the left/right sidebar).</li>
+      <li>Add JSON headers, for example:</li>
+    </ul>
+    <pre>{
+  "Authorization": "Bearer &lt;accessToken&gt;",
+  "Content-Type": "application/json"
+}</pre>
+  </div>
+
+  <h2>Quick Requests (POST /graphql)</h2>
+
+  <h3>Register</h3>
+  <pre>{
+  "query": "mutation Register($input: RegisterInput!){ register(input: $input){ user { id email name createdAt updatedAt } tokens { accessToken refreshToken } } }",
+  "variables": {
+    "input": { "email": "alice@example.com", "password": "Passw0rd!", "name": "Alice" }
+  }
+}</pre>
+
+  <h3>Login</h3>
+  <pre>{
+  "query": "mutation Login($input: LoginInput!){ login(input: $input){ user { id email name } tokens { accessToken refreshToken } } }",
+  "variables": {
+    "input": { "email": "alice@example.com", "password": "Passw0rd!" }
+  }
+}</pre>
+
+  <h3>Me (requires accessToken)</h3>
+  <pre>{
+  "query": "query Me { me { id email name createdAt updatedAt } }"
+}</pre>
+
+  <h3>Refresh Token</h3>
+  <pre>{
+  "query": "mutation Refresh($token: String!){ refreshToken(refreshToken: $token){ accessToken refreshToken } }",
+  "variables": { "token": "&lt;refreshToken&gt;" }
+}</pre>
+
+  <h3>Logout (requires accessToken)</h3>
+  <pre>{
+  "query": "mutation { logout }"
+}</pre>
+
+  <h2>GraphQL Operations (copy/paste)</h2>
+
+  <h3>Register</h3>
+  <pre>mutation Register($input: RegisterInput!) {
+  register(input: $input) {
+    user {
+      id
+      email
+      name
+      createdAt
+      updatedAt
+    }
+    tokens {
+      accessToken
+      refreshToken
+    }
+  }
+}</pre>
+
+  <h4>Variables</h4>
+  <pre>{
+  "input": {
+    "email": "alice@example.com",
+    "password": "Passw0rd!",
+    "name": "Alice"
+  }
+}</pre>
+
+  <h3>Login</h3>
+  <pre>mutation Login($input: LoginInput!) {
+  login(input: $input) {
+    user { id email name }
+    tokens { accessToken refreshToken }
+  }
+}</pre>
+
+  <h4>Variables</h4>
+  <pre>{
+  "input": { "email": "alice@example.com", "password": "Passw0rd!" }
+}</pre>
+
+  <h3>Me</h3>
+  <pre>query Me {
+  me { id email name createdAt updatedAt }
+}</pre>
+
+  <h3>Refresh Token</h3>
+  <pre>mutation Refresh($token: String!) {
+  refreshToken(refreshToken: $token) {
+    accessToken
+    refreshToken
+  }
+}</pre>
+
+  <h4>Variables</h4>
+  <pre>{
+  "token": "&lt;refreshToken&gt;"
+}</pre>
+
+  <h3>Logout</h3>
+  <pre>mutation {
+  logout
+}</pre>
+
+  <h2>Email OTP</h2>
+  <h3>Request Email OTP</h3>
+  <pre>mutation RequestEmailOTP($email: String!) {
+  requestEmailOTP(email: $email)
+}</pre>
+
+  <h4>Variables</h4>
+  <pre>{
+  "email": "alice@example.com"
+}</pre>
+
+  <h3>Verify Email OTP</h3>
+  <pre>mutation VerifyEmailOTP($email: String!, $otp: String!) {
+  verifyEmailOTP(email: $email, otp: $otp) {
+    user { id email name isEmailVerified }
+    tokens { accessToken refreshToken }
+  }
+}</pre>
+
+  <h4>Variables</h4>
+  <pre>{
+  "email": "alice@example.com",
+  "otp": "123456"
+}</pre>
+
+  <h2>cURL Examples</h2>
+  <h3>Login</h3>
+  <pre>curl -X POST http://localhost:8080/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "mutation($input: LoginInput!){ login(input: $input){ user { id email } tokens { accessToken refreshToken } } }",
+    "variables": { "input": { "email": "alice@example.com", "password": "Passw0rd!" } }
+  }'</pre>
+
+  <h3>Me</h3>
+  <pre>curl -X POST http://localhost:8080/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer &lt;accessToken&gt;" \
+  -d '{ "query": "{ me { id email name } }" }'</pre>
+
+  <p class="hint">Notes: Keep <code>JWT_ACCESS_TTL_SEC</code> short (e.g., 900s) and rotate refresh on every refresh call. On password change or security events, increment <code>user.tokenVersion</code> or revoke all refresh tokens.</p>
+</body>
+</html>
+

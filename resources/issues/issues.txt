@@ -4,7 +4,6 @@
 | --- | --- | --- | --- | --- | --- |
 | OTP brute-force protection missing | Risk of code guessing | High | Add rate-limit per email/IP and max attempts; lockout window | Backend | Open |
 | OTP resend cooldown not enforced | Email abuse, provider throttling | Medium | Enforce cooldown in Redis; return generic success | Backend | Open |
-| Enforce email verification before login (policy) | Unverified access if required by product | Medium | If required, block login when `isEmailVerified=false` | Product/Backend | Open |
 | Refresh token reuse detection | Silent theft can go unnoticed | Medium | Detect reused/rotated RT and revoke all for user; alert | Backend | Open |
 | Missing password reset GraphQL | Users cannot recover access | Medium | Add `requestPasswordReset`/`resetPassword` using existing templates | Backend | Open |
 | JWT secrets ephemeral in dev | Tokens invalidated on restart | Low | Document dev behavior; prefer `.env` secrets locally | DevEx | Open |
@@ -25,5 +24,14 @@
 - Redis: DONE — Retry/backoff and ping readiness
 - Docs: DONE — Swagger servers from env
 - New: CORS allow-all, CSP off, GraphQL rate-limit exempt, Swagger wildcard CORS, prod logging format
+
+## Newly Identified
+
+| Issue | Impact | Priority | Action | Owner | Status |
+| --- | --- | --- | --- | --- | --- |
+| GraphQL CSRF header requirement not documented in guide | Requests blocked | Medium | Add header examples (Content-Type + x-apollo-operation-name) | Docs | Resolved |
+| Me returned null without Bearer | DX confusion | Low | Accept tokens from Authorization/raw/cookies | Backend | Resolved |
+| Refresh sessions persisted to DB | Session mgmt needed | High | Implement hashed RT sessions in `User.sessions` | Backend | Resolved |
+| Resolver file grows large | Maintainability | Low | Split into `user/` auth & user resolvers | Backend | Resolved |
 
 
