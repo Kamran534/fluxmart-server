@@ -5,7 +5,7 @@
 | OTP brute-force protection missing | Risk of code guessing | High | Add rate-limit per email/IP and max attempts; lockout window | Backend | Open |
 | OTP resend cooldown not enforced | Email abuse, provider throttling | Medium | Enforce cooldown in Redis; return generic success | Backend | Open |
 | Refresh token reuse detection | Silent theft can go unnoticed | Medium | Detect reused/rotated RT and revoke all for user; alert | Backend | Open |
-| Missing password reset GraphQL | Users cannot recover access | Medium | Add `requestPasswordReset`/`resetPassword` using existing templates | Backend | Open |
+| Missing password reset GraphQL | Users cannot recover access | Medium | Added `requestPasswordReset`/`resetPassword` with Redis token + emails | Backend | Closed |
 | JWT secrets ephemeral in dev | Tokens invalidated on restart | Low | Document dev behavior; prefer `.env` secrets locally | DevEx | Open |
 | SMTP deliverability (SPF/DKIM/DMARC) | OTP/welcome may land in spam | Medium | Verify domain and configure DNS records | DevOps | Open |
 | Global CORS wide-open in prod | Security risk | High | Restrict by `CORS_ALLOWED_ORIGINS` in prod | Backend | Open |

@@ -13,11 +13,14 @@ import {
   generateJti,
 } from '../../auth/tokens.js';
 import { generateOTP, storeOTP, verifyAndConsumeOTP } from '../../auth/otp.js';
+import { generateResetToken, storeResetToken, consumeResetToken } from '../../auth/reset.js';
 
 const toUserDTO = (user) => ({
   id: user.id,
   email: user.email,
   name: user.name,
+  roles: Array.isArray(user.roles) ? user.roles : [],
+  addresses: Array.isArray(user.addresses) ? user.addresses : [],
   isEmailVerified: user.isEmailVerified,
   createdAt: user.createdAt,
   updatedAt: user.updatedAt,
@@ -31,7 +34,13 @@ export const authResolvers = {
       if (existing) throw Object.assign(new Error('Email already in use'), { status: 400 });
 
       const passwordHash = await bcrypt.hash(input.password, 10);
-      const user = await User.create({ email, passwordHash, name: input.name || undefined });
+      const user = await User.create({
+        email,
+        passwordHash,
+        name: input.name || undefined,
+        roles: ['customer'],
+        addresses: [],
+      });
 
       try {
         const otp = generateOTP();
@@ -109,7 +118,17 @@ export const authResolvers = {
       }
 
       const valid = await isRefreshTokenValid(userId, jti, refreshToken);
-      if (!valid) throw Object.assign(new Error('Refresh token expired or rotated'), { status: 401 });
+      if (!valid) {
+        // Reuse detected or token rotated: revoke all sessions and bump tokenVersion
+        try {
+          await revokeAllRefreshTokensForUser(userId);
+          user.tokenVersion = (user.tokenVersion || 0) + 1;
+          user.sessions = [];
+          await user.save();
+          try { console.log(` Refresh token reuse detected for user ${user.email} — revoked all sessions `.bgRed.white.bold); } catch (_) { console.log(`Refresh token reuse detected for user ${user.email} — revoked all sessions`); }
+        } catch (_) {}
+        throw Object.assign(new Error('Refresh token expired or rotated'), { status: 401 });
+      }
 
       const newAccessToken = signAccessToken(user);
       const newJti = generateJti();
@@ -170,6 +189,41 @@ export const authResolvers = {
         await user.save();
       } catch (_) {}
       return { user: toUserDTO(user), tokens: { accessToken, refreshToken } };
+    },
+
+    requestPasswordReset: async (_parent, { email }) => {
+      const normalized = email.trim().toLowerCase();
+      const user = await User.findOne({ email: normalized });
+      if (!user) return true; // do not reveal existence
+      try {
+        const token = generateResetToken();
+        await storeResetToken(normalized, token);
+        const frontendBase = process.env.FRONTEND_BASE_URL || 'https://fluxmart.com';
+        const resetLink = `${frontendBase}/reset-password?token=${encodeURIComponent(token)}`;
+        await emailService.sendPasswordResetEmail({ to: normalized, name: user.name || user.email, resetLink, expiryHours: Number(process.env.RESET_TTL_HOURS || 1) });
+      } catch (err) {
+        try { console.log(` Password reset email failed for ${normalized}: ${err.message} `.bgRed.white.bold); } catch (_) { console.log(`Password reset email failed for ${normalized}: ${err.message}`); }
+      }
+      return true;
+    },
+
+    resetPassword: async (_parent, { token, newPassword }) => {
+      if (!newPassword || newPassword.length < 8) {
+        throw Object.assign(new Error('Password must be at least 8 characters'), { status: 400 });
+      }
+      const email = await consumeResetToken(token);
+      if (!email) {
+        throw Object.assign(new Error('Invalid or expired token'), { status: 400 });
+      }
+      const user = await User.findOne({ email });
+      if (!user) return true;
+      user.passwordHash = await bcrypt.hash(newPassword, 10);
+      // Bump token version to revoke all refresh tokens
+      user.tokenVersion = (user.tokenVersion || 0) + 1;
+      user.sessions = [];
+      await user.save();
+      try { await revokeAllRefreshTokensForUser(user.id); } catch (_) {}
+      return true;
     },
   },
 };

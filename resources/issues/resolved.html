@@ -14,6 +14,7 @@
 </head>
 <body>
   <h1>Resolved Issues</h1>
+  <div id="current-dt" style="margin: 6px 0 14px; color:#444; font-size: 14px;"></div>
   <table>
     <thead>
       <tr>
@@ -34,8 +35,26 @@
       <tr><td>Persist refresh sessions</td><td>Hashed sessions on login/refresh; cleared on logout</td><td>2025-10-06</td><td>00:48</td></tr>
       <tr><td>Split resolvers</td><td>Created graphql/user/* and composed exports</td><td>2025-10-06</td><td>00:48</td></tr>
       <tr><td>Enforce email verification before login</td><td>Login blocked when not verified (403)</td><td>2025-10-06</td><td>00:48</td></tr>
+      <tr><td>Missing password reset GraphQL</td><td>Added <code>requestPasswordReset</code>/<code>resetPassword</code> with Redis token + emails</td><td>2025-10-06</td><td>01:35</td></tr>
+      <tr><td>Refresh token reuse detection</td><td>Revoke all tokens, bump tokenVersion, clear sessions on reuse</td><td>2025-10-06</td><td>01:35</td></tr>
+      <tr><td>Helmet CSP disabled</td><td>Enabled CSP in production; relaxed only in dev for tooling</td><td>2025-10-06</td><td>01:35</td></tr>
     </tbody>
   </table>
+  <script>
+    (function(){
+      try {
+        var el = document.getElementById('current-dt');
+        if (!el) return;
+        var now = new Date();
+        var yyyy = now.getFullYear();
+        var mm = String(now.getMonth() + 1).padStart(2, '0');
+        var dd = String(now.getDate()).padStart(2, '0');
+        var hh = String(now.getHours()).padStart(2, '0');
+        var min = String(now.getMinutes()).padStart(2, '0');
+        el.textContent = 'Current time: ' + yyyy + '-' + mm + '-' + dd + ' ' + hh + ':' + min;
+      } catch (e) {}
+    })();
+  </script>
 </body>
 </html>
 

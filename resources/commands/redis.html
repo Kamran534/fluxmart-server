@@ -1,4 +1,19 @@
-Redis - Commands and Responses (FluxMart)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Redis - Commands and Responses (FluxMart)</title>
+  <style>
+    body { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; padding: 24px; color: #111; background: #fff; }
+    h1 { font-size: 20px; margin: 0 0 12px; }
+    pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow: auto; line-height: 1.4; }
+    .note { margin-top: 12px; }
+  </style>
+  </head>
+<body>
+  <h1>Redis - Commands and Responses (FluxMart)</h1>
+  <pre><code>Redis - Commands and Responses (FluxMart)
 
 1) Start Redis (detached)
 Command:
@@ -14,25 +29,25 @@ Command:
 
 Example response (truncated):
   CONTAINER ID   IMAGE          COMMAND                  CREATED          STATUS          PORTS                                         NAMES
-  dd7a4a752c25   redis:latest   "docker-entrypoint.s…"   7 minutes ago    Up 4 seconds    0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp   redis-fluxmart-database
+  dd7a4a752c25   redis:latest   "docker-entrypoint.s…"   7 minutes ago    Up 4 seconds    0.0.0.0:6379-&gt;6379/tcp, [::]:6379-&gt;6379/tcp   redis-fluxmart-database
 
 3) Open Redis CLI inside the container
 Command:
   docker exec -it redis-fluxmart-database redis-cli
 
 Example response:
-  127.0.0.1:6379>
+  127.0.0.1:6379&gt;
 
 4) Redis CLI: PING (connectivity)
 At the redis-cli prompt run:
-  127.0.0.1:6379> PING
+  127.0.0.1:6379&gt; PING
 
 Example response:
   PONG
 
 5) Redis CLI: INFO (server diagnostics)
 At the redis-cli prompt run:
-  127.0.0.1:6379> INFO
+  127.0.0.1:6379&gt; INFO
 
 Example response (truncated):
   # Server
@@ -73,3 +88,8 @@ Console:
   echo http://localhost:8001/
 Connection URL (for RedisInsight):
   redis://default@host.docker.internal:6379
+  </code></pre>
+</body>
+</html>
+
+

@@ -61,7 +61,7 @@
 
   <h3>Register</h3>
   <pre>{
-  "query": "mutation Register($input: RegisterInput!){ register(input: $input){ user { id email name createdAt updatedAt } tokens { accessToken refreshToken } } }",
+  "query": "mutation Register($input: RegisterInput!){ register(input: $input){ user { id email name roles addresses { label line1 city country isDefault } createdAt updatedAt } tokens { accessToken refreshToken } } }",
   "variables": {
     "input": { "email": "alice@example.com", "password": "Passw0rd!", "name": "Alice" }
   }
@@ -69,7 +69,7 @@
 
   <h3>Login</h3>
   <pre>{
-  "query": "mutation Login($input: LoginInput!){ login(input: $input){ user { id email name } tokens { accessToken refreshToken } } }",
+  "query": "mutation Login($input: LoginInput!){ login(input: $input){ user { id email name roles addresses { label line1 city country isDefault } } tokens { accessToken refreshToken } } }",
   "variables": {
     "input": { "email": "alice@example.com", "password": "Passw0rd!" }
   }
@@ -77,7 +77,7 @@
 
   <h3>Me (requires accessToken)</h3>
   <pre>{
-  "query": "query Me { me { id email name createdAt updatedAt } }"
+  "query": "query Me { me { id email name roles addresses { label line1 city country isDefault } profileImageUrl createdAt updatedAt } }"
 }</pre>
 
   <h3>Refresh Token</h3>
@@ -91,6 +91,36 @@
   "query": "mutation { logout }"
 }</pre>
 
+  <h3>Password Reset: Request</h3>
+  <pre>{
+  "query": "mutation RequestPasswordReset($email: String!){ requestPasswordReset(email: $email) }",
+  "variables": { "email": "alice@example.com" }
+}</pre>
+
+  <h3>Password Reset: Confirm</h3>
+  <pre>{
+  "query": "mutation ResetPassword($token: String!, $pwd: String!){ resetPassword(token: $token, newPassword: $pwd) }",
+  "variables": { "token": "<tokenFromEmail>", "pwd": "NewPassw0rd!" }
+}</pre>
+
+  <h3>Profile Image: Get Presigned Upload URL (requires accessToken)</h3>
+  <pre>{
+  "query": "mutation PresignUpload($input: PresignProfileImageInput!){ presignProfileImageUpload(input: $input){ url key } }",
+  "variables": { "input": { "contentType": "image/jpeg", "fileExtension": "jpg" } }
+}</pre>
+
+  <h3>Profile Image: Set Profile Image (requires accessToken)</h3>
+  <pre>{
+  "query": "mutation SetProfileImage($key: String!){ setProfileImage(key: $key){ id email name profileImageUrl } }",
+  "variables": { "key": "users/123/profile/1234567890.jpg" }
+}</pre>
+
+  <h3>Profile Image: Get Presigned View URL (requires accessToken)</h3>
+  <pre>{
+  "query": "mutation PresignView($key: String!){ presignProfileImageView(key: $key){ url expiresIn } }",
+  "variables": { "key": "users/123/profile/1234567890.jpg" }
+}</pre>
+
   <h2>GraphQL Operations (copy/paste)</h2>
 
   <h3>Register</h3>
@@ -100,6 +130,8 @@
       id
       email
       name
+      roles
+      addresses { label line1 city country isDefault }
       createdAt
       updatedAt
     }
@@ -122,7 +154,7 @@
   <h3>Login</h3>
   <pre>mutation Login($input: LoginInput!) {
   login(input: $input) {
-    user { id email name }
+    user { id email name roles addresses { label line1 city country isDefault } }
     tokens { accessToken refreshToken }
   }
 }</pre>
@@ -134,7 +166,16 @@
 
   <h3>Me</h3>
   <pre>query Me {
-  me { id email name createdAt updatedAt }
+  me { 
+    id 
+    email 
+    name 
+    roles
+    addresses { label line1 city country isDefault }
+    profileImageUrl
+    createdAt 
+    updatedAt 
+  }
 }</pre>
 
   <h3>Refresh Token</h3>
@@ -155,6 +196,28 @@
   logout
 }</pre>
 
+  <h2>Password Reset</h2>
+  <h3>Request Password Reset</h3>
+  <pre>mutation RequestPasswordReset($email: String!) {
+  requestPasswordReset(email: $email)
+}</pre>
+
+  <h4>Variables</h4>
+  <pre>{
+  "email": "alice@example.com"
+}</pre>
+
+  <h3>Reset Password</h3>
+  <pre>mutation ResetPassword($token: String!, $newPassword: String!) {
+  resetPassword(token: $token, newPassword: $newPassword)
+}</pre>
+
+  <h4>Variables</h4>
+  <pre>{
+  "token": "<tokenFromEmail>",
+  "newPassword": "NewPassw0rd!"
+}</pre>
+
   <h2>Email OTP</h2>
   <h3>Request Email OTP</h3>
   <pre>mutation RequestEmailOTP($email: String!) {
@@ -169,7 +232,7 @@
   <h3>Verify Email OTP</h3>
   <pre>mutation VerifyEmailOTP($email: String!, $otp: String!) {
   verifyEmailOTP(email: $email, otp: $otp) {
-    user { id email name isEmailVerified }
+    user { id email name roles addresses { label line1 city country isDefault } isEmailVerified }
     tokens { accessToken refreshToken }
   }
 }</pre>
@@ -180,12 +243,195 @@
   "otp": "123456"
 }</pre>
 
+  <h2>Profile Image Management</h2>
+  
+  <h3>Get Presigned Upload URL</h3>
+  <pre>mutation PresignProfileImageUpload($input: PresignProfileImageInput!) {
+  presignProfileImageUpload(input: $input) {
+    url
+    key
+  }
+}</pre>
+
+  <h4>Variables</h4>
+  <pre>{
+  "input": {
+    "contentType": "image/jpeg",
+    "fileExtension": "jpg"
+  }
+}</pre>
+
+  <h3>Set Profile Image</h3>
+  <pre>mutation SetProfileImage($key: String!) {
+  setProfileImage(key: $key) {
+    id
+    email
+    name
+    profileImageUrl
+  }
+}</pre>
+
+  <h4>Variables</h4>
+  <pre>{
+  "key": "users/123/profile/1234567890.jpg"
+}</pre>
+
+  <h3>Get Presigned View URL</h3>
+  <pre>mutation PresignProfileImageView($key: String!) {
+  presignProfileImageView(key: $key) {
+    url
+    expiresIn
+  }
+}</pre>
+
+  <h4>Variables</h4>
+  <pre>{
+  "key": "users/123/profile/1234567890.jpg"
+}</pre>
+
+  <h3>View Image via Express Proxy (always private)</h3>
+  <p>There are two ways to proxy an image from S3 through the server:</p>
+  <ul>
+    <li><strong>Query param variant (Swagger-friendly)</strong>: <code>GET /api/image?key=users/123/profile/image.jpg</code></li>
+    <li><strong>Path param variant</strong>: <code>GET /api/image/{key}</code> with URL-encoded slashes, e.g. <code>users%2F123%2Fprofile%2Fimage.jpg</code></li>
+  </ul>
+
+  <h4>Swagger usage</h4>
+  <ul>
+    <li>Open <code>/api-docs</code> and go to the <strong>Images</strong> tag.</li>
+    <li>Prefer <strong>GET /api/image</strong> and pass <code>key</code> as a query param to avoid URL-encoding.</li>
+    <li>Add <code>Authorization: Bearer &lt;accessToken&gt;</code> in the Authorize dialog.</li>
+  </ul>
+
+  <p class="hint"><strong>Note:</strong> Swagger UI typically does not inline-render binary image responses. You'll see a successful 200 and headers, and can click the download button to save/open the image. To view inline, open the URL in a new browser tab using your JWT in the <code>Authorization</code> header or <code>?token=&lt;accessToken&gt;</code> query param.</p>
+
+  <h4>cURL — Query param variant</h4>
+  <pre>curl -X GET "http://localhost:8080/api/image?key=users/123/profile/1234567890.jpg" \
+  -H "Authorization: Bearer &lt;accessToken&gt;" \
+  -H "Accept: image/*" --output image.jpg</pre>
+
+  <h4>cURL — Path param variant (URL-encoded key)</h4>
+  <pre>curl -X GET "http://localhost:8080/api/image/users%2F123%2Fprofile%2F1234567890.jpg" \
+  -H "Authorization: Bearer &lt;accessToken&gt;" \
+  -H "Accept: image/*" --output image.jpg</pre>
+
+  <h2>Address Management (requires accessToken)</h2>
+  <h3>Add Address</h3>
+  <pre>{
+  "query": "mutation Add($input: AddressInput!){ addAddress(input: $input){ id email roles addresses { label line1 city country isDefault } } }",
+  "variables": {
+    "input": {
+      "label": "Home",
+      "line1": "123 Main St",
+      "city": "Springfield",
+      "state": "IL",
+      "postalCode": "62704",
+      "country": "US",
+      "isDefault": true
+    }
+  }
+}</pre>
+
+  <h3>Update Address</h3>
+  <pre>{
+  "query": "mutation Upd($index:Int!, $input: AddressInput!){ updateAddress(index:$index, input:$input){ addresses { label line1 city state postalCode country isDefault } } }",
+  "variables": { "index": 0, "input": { "label": "Home", "line2": "Apt 4B" } }
+}</pre>
+
+  <h3>Remove Address</h3>
+  <pre>{
+  "query": "mutation Rem($index:Int!){ removeAddress(index:$index){ addresses { label line1 city country isDefault } } }",
+  "variables": { "index": 0 }
+}</pre>
+
+  <h3>Set Default Address</h3>
+  <pre>{
+  "query": "mutation Def($index:Int!){ setDefaultAddress(index:$index){ addresses { label line1 city country isDefault } } }",
+  "variables": { "index": 1 }
+}</pre>
+
+  <h3>Address Operations for Apollo Sandbox / GraphQL Playground</h3>
+  <p>Copy the operation into the editor and the variables into the <strong>Variables</strong> panel. Ensure you have set the <code>Authorization</code> header with a valid access token.</p>
+
+  <h4>Add Address — Operation</h4>
+  <pre>mutation AddAddress($input: AddressInput!) {
+  addAddress(input: $input) {
+    id
+    email
+    roles
+    addresses { label line1 line2 city state postalCode country isDefault }
+  }
+}</pre>
+
+  <h4>Add Address — Variables</h4>
+  <pre>{
+  "input": {
+    "label": "Home",
+    "line1": "123 Main St",
+    "line2": "",
+    "city": "Springfield",
+    "state": "IL",
+    "postalCode": "62704",
+    "country": "US",
+    "isDefault": true
+  }
+}</pre>
+
+  <h4>Update Address — Operation</h4>
+  <pre>mutation UpdateAddress($index: Int!, $input: AddressInput!) {
+  updateAddress(index: $index, input: $input) {
+    addresses { label line1 line2 city state postalCode country isDefault }
+  }
+}</pre>
+
+  <h4>Update Address — Variables</h4>
+  <pre>{
+  "index": 0,
+  "input": { "label": "Home", "line2": "Apt 4B" }
+}</pre>
+
+  <h4>Remove Address — Operation</h4>
+  <pre>mutation RemoveAddress($index: Int!) {
+  removeAddress(index: $index) {
+    addresses { label line1 city country isDefault }
+  }
+}</pre>
+
+  <h4>Remove Address — Variables</h4>
+  <pre>{ "index": 0 }</pre>
+
+  <h4>Set Default Address — Operation</h4>
+  <pre>mutation SetDefaultAddress($index: Int!) {
+  setDefaultAddress(index: $index) {
+    addresses { label line1 city country isDefault }
+  }
+}</pre>
+
+  <h4>Set Default Address — Variables</h4>
+  <pre>{ "index": 1 }</pre>
+
+  <h2>Role Management (admin only, requires accessToken)</h2>
+  <p>Only users with <code>admin</code> role can update roles.</p>
+  <h3>Set Roles — Operation</h3>
+  <pre>mutation SetRoles($userId: ID!, $roles: [String!]!) {
+  setRoles(userId: $userId, roles: $roles) {
+    id
+    email
+    roles
+  }
+}</pre>
+  <h3>Set Roles — Variables</h3>
+  <pre>{
+  "userId": "<targetUserId>",
+  "roles": ["customer", "admin"]
+}</pre>
+
   <h2>cURL Examples</h2>
   <h3>Login</h3>
   <pre>curl -X POST http://localhost:8080/graphql \
   -H "Content-Type: application/json" \
   -d '{
-    "query": "mutation($input: LoginInput!){ login(input: $input){ user { id email } tokens { accessToken refreshToken } } }",
+    "query": "mutation($input: LoginInput!){ login(input: $input){ user { id email roles } tokens { accessToken refreshToken } } }",
     "variables": { "input": { "email": "alice@example.com", "password": "Passw0rd!" } }
   }'</pre>
 
@@ -193,7 +439,58 @@
   <pre>curl -X POST http://localhost:8080/graphql \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer &lt;accessToken&gt;" \
-  -d '{ "query": "{ me { id email name } }" }'</pre>
+  -d '{ "query": "{ me { id email name roles addresses { label line1 city country isDefault } profileImageUrl } }" }'</pre>
+
+  <h2>User Fields Reference</h2>
+  <ul>
+    <li><code>roles</code>: array of strings. Default <code>["customer"]</code>. Example: <code>["customer","admin"]</code></li>
+    <li><code>addresses</code>: array of address objects with fields: <code>label</code>, <code>line1</code>, <code>line2</code>, <code>city</code>, <code>state</code>, <code>postalCode</code>, <code>country</code>, <code>isDefault</code></li>
+  </ul>
+
+  <h3>Profile Image Upload (cURL)</h3>
+  <pre># Step 1: Get presigned upload URL
+curl -X POST http://localhost:8080/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer &lt;accessToken&gt;" \
+  -d '{
+    "query": "mutation($input: PresignProfileImageInput!){ presignProfileImageUpload(input: $input){ url key } }",
+    "variables": { "input": { "contentType": "image/jpeg" } }
+  }'
+
+# Step 2: Upload file to the presigned URL (use the 'url' from step 1)
+curl -X PUT "&lt;presignedUrl&gt;" \
+  -H "Content-Type: image/jpeg" \
+  --data-binary @image.jpg
+
+# Step 3: Set profile image (use the 'key' from step 1)
+curl -X POST http://localhost:8080/graphql \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer &lt;accessToken&gt;" \
+  -d '{
+    "query": "mutation($key: String!){ setProfileImage(key: $key){ id profileImageUrl } }",
+    "variables": { "key": "&lt;keyFromStep1&gt;" }
+  }'</pre>
+
+  <h3>Password Reset (cURL)</h3>
+  <pre># Request
+curl -X POST http://localhost:8080/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "mutation($email:String!){ requestPasswordReset(email:$email) }",
+    "variables": { "email": "alice@example.com" }
+  }'
+
+# Confirm
+curl -X POST http://localhost:8080/graphql \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "mutation($t:String!,$p:String!){ resetPassword(token:$t, newPassword:$p) }",
+    "variables": { "t": "<tokenFromEmail>", "p": "NewPassw0rd!" }
+  }'</pre>
+
+  <p class="hint">Password reset link expires after <code>RESET_TTL_HOURS</code> (default 1h). Frontend link base is <code>FRONTEND_BASE_URL</code> or defaults to <code>https://fluxmart.com</code>.</p>
+
+  <p class="hint"><strong>Profile Images:</strong> Images are stored in private S3 bucket. Use presigned URLs for uploads and viewing. Express proxy available at <code>/api/image/:key</code> with JWT authentication. Supported formats: JPEG, PNG, WebP, GIF.</p>
 
   <p class="hint">Notes: Keep <code>JWT_ACCESS_TTL_SEC</code> short (e.g., 900s) and rotate refresh on every refresh call. On password change or security events, increment <code>user.tokenVersion</code> or revoke all refresh tokens.</p>
 </body>

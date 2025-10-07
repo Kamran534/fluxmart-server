@@ -60,8 +60,7 @@ const options = {
     },
     tags: [
       { name: 'Health', description: 'Server health and status endpoints' },
-      { name: 'Email', description: 'Email service endpoints' },
-      { name: 'GraphQL', description: 'GraphQL API endpoints' }
+      { name: 'Profile Images', description: 'Profile image upload and viewing endpoints' }
     ],
     security: [
       {
@@ -76,5 +75,17 @@ const options = {
 };
 
 const specs = swaggerJsdoc(options);
+
+// Post-process: remove unwanted sections
+try {
+  // Remove Email and GraphQL tags if present
+  if (Array.isArray(specs.tags)) {
+    specs.tags = specs.tags.filter((t) => t?.name !== 'Email' && t?.name !== 'GraphQL');
+  }
+  // Remove specific paths
+  if (specs.paths) {
+    delete specs.paths['/test-email'];
+  }
+} catch (_) {}
 
 export { swaggerUi, specs };

@@ -14,6 +14,25 @@ Implemented Features
   - JWT access and refresh tokens with Redis rotation/blacklist
   - Email OTP verification using Redis TTL-backed codes
   - Transactional emails: Welcome and OTP via EJS templates
+  - Password reset: requestPasswordReset/resetPassword with Redis-backed tokens and email links
+  - Refresh token reuse detection: revoke all sessions and bump tokenVersion on reuse
+
+- S3 Integration
+  - AWS SDK v3 with presigned URL generation
+  - Private bucket configuration with IAM policy
+  - Presigned upload URLs for secure client uploads
+  - Presigned view URLs for temporary image access
+  - Object streaming for Express proxy endpoint
+  - Error handling and validation
+
+- Profile Images
+  - User model extended with profileImageUrl field
+  - GraphQL mutations: presignProfileImageUpload, setProfileImage, presignProfileImageView
+  - Automatic presigned URL generation in user queries
+  - Express proxy route /api/image/:key with JWT authentication
+  - Image format validation (JPEG, PNG, WebP, GIF)
+  - User-scoped access control (users can only access their own images)
+  - Swagger documentation for image endpoints
 
 - API Documentation
   - Swagger UI at /api-docs (OpenAPI 3.0)
@@ -31,9 +50,14 @@ Implemented Features
 
 - Security
   - CORS restricted by env (CORS_ALLOWED_ORIGINS)
-  - Helmet security headers
+  - Helmet security headers; strict CSP enabled in production, relaxed in dev for tooling
   - Rate limiting with express-rate-limit (RATE_LIMIT_* envs)
   - Email test route Swagger marked public (security: []) to match behavior
+
+- Developer Experience
+  - RedisInsight UI endpoint printed on startup; docs for commands and connection URL
+  - Auth Guide updated with password reset examples and cURL snippets
+  - Complete profile image workflow documentation with GraphQL and cURL examples
 
 - Logging
   - Morgan HTTP request logging (dev format)
@@ -45,5 +69,7 @@ Implemented Features
   - docker-compose uses env interpolation for app configuration
 
 Notes
-- Set required envs: MONGODB_URI, REDIS_URL, SMTP_*, CORS_ALLOWED_ORIGINS.
+- Set required envs: MONGODB_URI, REDIS_URL, SMTP_*, CORS_ALLOWED_ORIGINS, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_BUCKET.
 - In production: disable GraphQL introspection (default) and use strict CORS.
+- S3 bucket must be private with IAM policy allowing s3:PutObject and s3:GetObject.
+- Profile images are automatically converted to presigned URLs in GraphQL responses.

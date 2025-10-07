@@ -31,15 +31,15 @@
       </tr>
     </thead>
     <tbody>
+      <tr><td>Access token verify uses env secret only</td><td>Auth may fail in dev when secret is ephemeral</td><td><span class="tag prio-Medium">Medium</span></td><td>Use shared secret source (e.g., verifyAccessToken or getAccessSecret)</td><td>Backend</td><td><span class="tag status-Open">Open</span></td></tr>
+      <tr><td>Refresh tokens stored plaintext in Redis</td><td>Exposure if Redis compromised</td><td><span class="tag prio-Medium">Medium</span></td><td>Store and compare hashed RT (e.g., sha256) in Redis</td><td>Backend</td><td><span class="tag status-Open">Open</span></td></tr>
+      <tr><td>Password complexity not enforced</td><td>Weaker password security</td><td><span class="tag prio-Low">Low</span></td><td>Enforce server-side complexity (length, classes, breach check)</td><td>Backend</td><td><span class="tag status-Open">Open</span></td></tr>
       <tr><td>OTP brute-force protection missing</td><td>Risk of code guessing</td><td><span class="tag prio-High">High</span></td><td>Add rate-limit per email/IP and max attempts; lockout window</td><td>Backend</td><td><span class="tag status-Open">Open</span></td></tr>
       <tr><td>OTP resend cooldown not enforced</td><td>Email abuse, provider throttling</td><td><span class="tag prio-Medium">Medium</span></td><td>Enforce cooldown in Redis; return generic success</td><td>Backend</td><td><span class="tag status-Open">Open</span></td></tr>
-      <tr><td>Refresh token reuse detection</td><td>Silent theft can go unnoticed</td><td><span class="tag prio-Medium">Medium</span></td><td>Detect reused/rotated RT and revoke all for user; alert</td><td>Backend</td><td><span class="tag status-Open">Open</span></td></tr>
-      <tr><td>Missing password reset GraphQL</td><td>Users cannot recover access</td><td><span class="tag prio-Medium">Medium</span></td><td>Add <code>requestPasswordReset</code>/<code>resetPassword</code> using existing templates</td><td>Backend</td><td><span class="tag status-Open">Open</span></td></tr>
       <tr><td>JWT secrets ephemeral in dev</td><td>Tokens invalidated on restart</td><td><span class="tag prio-Low">Low</span></td><td>Document dev behavior; prefer <code>.env</code> secrets locally</td><td>DevEx</td><td><span class="tag status-Open">Open</span></td></tr>
       <tr><td>SMTP deliverability (SPF/DKIM/DMARC)</td><td>OTP/welcome may land in spam</td><td><span class="tag prio-Medium">Medium</span></td><td>Verify domain and configure DNS records</td><td>DevOps</td><td><span class="tag status-Open">Open</span></td></tr>
       <tr><td>Global CORS wide-open in prod</td><td>Security risk</td><td><span class="tag prio-High">High</span></td><td>Restrict by <code>CORS_ALLOWED_ORIGINS</code> in prod</td><td>Backend</td><td><span class="tag status-Open">Open</span></td></tr>
       <tr><td>/graphql not rate-limited</td><td>Possible abuse</td><td><span class="tag prio-High">High</span></td><td>Apply rate-limit to POST /graphql; keep GET exempt</td><td>Backend</td><td><span class="tag status-Open">Open</span></td></tr>
-      <tr><td>Helmet CSP disabled</td><td>Reduced protection</td><td><span class="tag prio-Medium">Medium</span></td><td>Enable CSP in prod; relax only for dev</td><td>Backend</td><td><span class="tag status-Open">Open</span></td></tr>
       <tr><td>Logging format in prod</td><td>Harder ops visibility</td><td><span class="tag prio-Low">Low</span></td><td>Use <code>combined</code>/JSON logs in prod</td><td>DevOps</td><td><span class="tag status-Open">Open</span></td></tr>
     </tbody>
   </table>

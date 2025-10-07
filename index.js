@@ -21,8 +21,28 @@ const app = express();
 // Create HTTP server
 const httpServer = createServer(app);
 
-// Security headers (allow Apollo landing page inline scripts)
-app.use(helmet({ contentSecurityPolicy: false }));
+// Security headers
+const isProd = process.env.NODE_ENV === 'production';
+if (isProd) {
+  app.use(helmet({
+    contentSecurityPolicy: {
+      useDefaults: true,
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:'],
+        connectSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        frameAncestors: ["'self'"],
+        upgradeInsecureRequests: [],
+      },
+    },
+  }));
+} else {
+  // Relax CSP in non-production for developer tools (Apollo, Swagger)
+  app.use(helmet({ contentSecurityPolicy: false }));
+}
 
 // Rate limiting (skip all /graphql requests)
 const limiter = rateLimit({
@@ -78,12 +98,13 @@ registerRoutes(app);
             console.log(` GraphQL endpoint `.bgBlue.white.bold, `${`http://localhost:${PORT}/graphql`.underline}`.blue.bold);
             console.log(` REST API endpoint `.bgYellow.black.bold, `${`http://localhost:${PORT}/`.underline}`.yellow.bold);
             console.log(` Swagger UI `.bgMagenta.white.bold, `${`http://localhost:${PORT}/api-docs`.underline}`.magenta.bold);
+            console.log(` RedisInsight UI `.bgCyan.black.bold, `${`http://localhost:8001`.underline}`.cyan.bold);
         });
 
         const shutdown = async (signal) => {
             console.log(`\n${signal} received, shutting down...`.yellow.bold);
             try {
-                httpServer.close(() => { console.log('HTTP server closed'.yellow); });
+                httpServer.close(() => { console.log('HTTP server closed'.yellow.bold); });
                 await disconnectRedis();
                 await disconnectDatabase();
             } catch (err) {
